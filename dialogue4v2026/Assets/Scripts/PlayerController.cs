@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
@@ -75,6 +77,14 @@ public class PlayerController : MonoBehaviour
                 Vector3 limited = horizontalVel.normalized * maxSpeed;
                 m_Rigidbody.linearVelocity = new Vector3(limited.x, m_Rigidbody.linearVelocity.y, limited.z);
             }
+        }
+    }
+
+    private void Update()
+    {
+        if (Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            InteractOM.Interact();
         }
     }
 }
