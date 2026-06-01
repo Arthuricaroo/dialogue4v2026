@@ -6,9 +6,7 @@ using UnityEngine.Rendering;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("Input")]
-    [Tooltip("Drag the Move action (Vector2) from the Input System asset here (use an Input Action Reference)")]
-    public InputActionReference moveAction;
+    private PlayerInput playerInput;
 
     [Header("Movement")]
     [Tooltip("Acceleration applied to the rigidbody when input is received (units/s^2)")]
@@ -22,6 +20,7 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
+        playerInput = GetComponent<PlayerInput>();
         m_Rigidbody = GetComponent<Rigidbody>();
         if (m_Rigidbody == null)
             Debug.LogError("PlayerController requires a Rigidbody on the same GameObject.");
@@ -29,22 +28,19 @@ public class PlayerController : MonoBehaviour
 
     void OnEnable()
     {
-        if (moveAction != null && moveAction.action != null)
-        {
-            moveAction.action.Enable();
-            moveAction.action.performed += OnMovePerformed;
-            moveAction.action.canceled += OnMovePerformed;
-        }
+        playerInput.actions.FindAction("Move").performed += OnMovePerformed;
+        playerInput.actions.FindAction("Move").canceled += 
+            context => {m_MoveInput = Vector2.zero;};
+
+        playerInput.actions.FindAction("Interact").performed += OnInteract;
     }
+
+    
 
     void OnDisable()
     {
-        if (moveAction != null && moveAction.action != null)
-        {
-            moveAction.action.performed -= OnMovePerformed;
-            moveAction.action.canceled -= OnMovePerformed;
-            moveAction.action.Disable();
-        }
+        playerInput.actions.FindAction("Move").performed -= OnMovePerformed;
+        playerInput.actions.FindAction("Interact").performed -= OnInteract;
     }
 
     void OnMovePerformed(InputAction.CallbackContext ctx)
@@ -79,13 +75,10 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
-    private void Update()
+    
+    private void OnInteract(InputAction.CallbackContext obj)
     {
-        if (Keyboard.current.eKey.wasPressedThisFrame)
-        {
-            InteractOM.Interact();
-        }
+        InteractOM.Interact();
     }
 }
 
